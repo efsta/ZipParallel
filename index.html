@@ -1,0 +1,35 @@
+﻿<html>
+<head>
+    <script src="static/zipparallel.js"></script>
+    <script src="static/pako_deflate.min.js"></script>
+    <script>
+    function download() {
+        var zp = new ZipParallel(then)
+        function then() {
+            var files = [], cnt = 0
+            for (var i=0; i<11; i++) files.push(zp.entry('file'+i+'.txt'))
+            var interval = setInterval(()=>{
+                for (var i=0; i<1000; i++) {
+                    var index = Math.floor(files.length*Math.random())
+                    files[index].write('das ist Test #'+(++cnt)+'\r\n')
+                }
+            }, 1)
+            setTimeout(()=>{ clearInterval(interval); finish() }, 3000)
+        }    
+        function finish() {
+            var startedAt = Date.now()
+            zp.close((err, bytes)=>{
+                console.log('err:'+err, 'bytes:'+bytes)
+                zp.download('test.zip', ()=>{
+                    console.log('done '+(Date.now()-startedAt)+'ms')
+                })
+            })
+        }
+    }
+    </script>
+</head>
+<body>
+    <h1>Testseite</h1>
+    <button onclick="download()"> download </button>
+</body>
+</html>
